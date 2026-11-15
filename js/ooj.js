@@ -41,6 +41,12 @@ const countyAliases=code=>{const c=countyByCode.get(code);return c?[c.name,c.sho
 
 const kinds={myndighet:"Statlig myndighet",kommun:"Kommun",region:"Region"};
 const state={q:"",type:"alla",page:1};
+// Kontrollera att SCB-filen laddas innan katalogen används: annars syns bara
+// det manuella starturvalet av kommuner (det som tidigare såg ut som 12 st).
+const loadedCount=Array.isArray(window.OOJ_MUNICIPALITIES)?window.OOJ_MUNICIPALITIES.length:0;
+if(loadedCount!==290){
+  console.error("OOJ: kommunregistret är inte fullständigt laddat:",loadedCount,"av 290");
+}
 const topicCard=t=>'<a class="card topic-card" href="#/amne/'+encodeURIComponent(t.slug)+'"><div class="card-icon">'+escape(t.icon)+'</div><h3>'+escape(t.title)+'</h3><p>'+escape(t.description)+'</p></a>';
 const orgCard=o=>'<a class="org-result" href="'+href(o)+'"><div class="org-avatar" aria-hidden="true">'+escape(o.name.slice(0,2).toUpperCase())+'</div><div><h3>'+escape(o.name)+'</h3><p>'+escape(kinds[o.type])+' · '+escape(o.description)+(o.countyCode?' · '+escape(countyName(o.countyCode)):'')+'</p></div><span class="arrow" aria-hidden="true">↗</span></a>';
 function shell(title,description,crumbs,body){return '<section class="page-top"><div class="container page-heading"><div class="breadcrumbs"><a href="#/">Start</a> <span aria-hidden="true">/</span> '+crumbs+'</div><h1>'+escape(title)+'</h1><p>'+escape(description)+'</p></div></section><div class="container content-area">'+body+'</div>'}
@@ -72,6 +78,10 @@ return shell(c.name,"Kommuner och regionala offentliga organisationer med verifi
 function orgDirectory(type="alla"){
 const names={alla:["Sök i OOJ","Sök bland Sveriges kommuner och de offentliga organisationer som hittills registrerats."],kommun:["Kommuner","Hitta svenska kommuner och gå vidare till deras officiella webbplatser."],myndighet:["Myndigheter","Sök bland statliga myndigheter och andra hittills registrerade offentliga aktörer."],region:["Regioner","Utforska regioner och deras officiella webbplatser."]};
 const n=names[type],label=type==="alla"?"Sök":type==="kommun"?"Kommuner":type==="myndighet"?"Myndigheter":"Regioner";
+if(type==="kommun"){
+  const count=db.organizations.filter(o=>o.type==="kommun").length;
+  n[1]=count===290?"Alla Sveriges 290 kommuner, kopplade till respektive län. Sök eller filtrera bland dem.":"Kommunregistret är ofullständigt: "+count+" av 290 kommuner har laddats.";
+}
 return shell(n[0],n[1],escape(label),'<div class="toolbar"><input id="dir-search" type="search" placeholder="Sök namn, ort eller ansvarsområde…" aria-label="Sök organisationer" value="'+escape(state.q)+'"><select id="dir-type" aria-label="Filtrera typ"><option value="alla">Alla organisationer</option><option value="kommun">Kommuner</option><option value="myndighet">Myndigheter</option><option value="region">Regioner</option></select><select id="dir-county" aria-label="Filtrera län"><option value="">Alla län</option>'+geo.counties.map(c=>'<option value="'+escape(c.code)+'">'+escape(c.name)+'</option>').join("")+'</select></div><div class="result-count" id="count" aria-live="polite"></div><div class="org-list" id="results"></div><div class="pagination" id="pager"></div><p class="note" style="margin-top:27px">Kommunregistret omfattar 290 kommuner från SCB 2026. Officiella webbadresser visas bara när de har verifierats. Myndigheter och regioner är ännu inte kompletta.</p>');
 }
 function profile(id){
@@ -98,8 +108,13 @@ const parts=q.split(/\s+/).filter(Boolean);
 const county=$("#dir-county").value;
 let matches=db.organizations.filter(o=>(type==="alla"||o.type===type)&&(!county||o.countyCode===county)&&(!parts.length||parts.every(part=>fold([o.name,o.description,o.type,...o.tags,countyAliases(o.countyCode)].join(" ")).includes(part))));
 matches.sort((a,b)=>a.name.localeCompare(b.name,"sv"));
-const limit=50,total=Math.max(1,Math.ceil(matches.length/limit));state.page=Math.min(state.page,total);
-$("#count").textContent=matches.length+" organisationer i katalogen";
+const limit=100,total=Math.max(1,Math.ceil(matches.length/limit));state.page=Math.min(state.page,total);
+const nationalCount=db.organizations.filter(o=>o.type==="kommun").length;
+$("#count").textContent=matches.length+" träffar"+(type==="kommun"?" · "+nationalCount+" kommuner i hela katalogen":"")+
+  (matches.length>limit?" · Visar "+Math.min(limit,matches.length)+" per sida":"");
+if(type==="kommun"&&nationalCount!==290){
+  $("#count").textContent+=" · VARNING: kommunfilen är inte komplett – kontrollera att senaste JS laddats.";
+}
 $("#results").innerHTML=matches.length?matches.slice((state.page-1)*limit,state.page*limit).map(orgCard).join(""):'<div class="empty"><h3>Inga träffar i katalogen</h3><p>Prova ett annat namn eller ämne. Prova ett annat namn eller län.</p></div>';
 $("#pager").innerHTML=matches.length>limit?'<button type="button" id="prev" '+(state.page===1?"disabled":"")+'>← Föregående</button><span>Sida '+state.page+' av '+total+'</span><button type="button" id="next" '+(state.page===total?"disabled":"")+'>Nästa →</button>':"";
 $("#prev")?.addEventListener("click",()=>{state.page--;renderResults();$("#results")?.scrollIntoView({block:"start"})});
