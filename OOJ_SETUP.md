@@ -23,3 +23,7 @@ Kör valfri statisk filserver i repositoryroten, t.ex. `python3 -m http.server 8
 
 ## Teknik
 Vanlig HTML/CSS/JavaScript utan framework och utan backend i denna fas. Målet är snabb visuell validering av OpenGovUI-layouten innan en eventuell Next.js-migrering. Visuell inspiration: Helsinki Design System, Designers Italia och 21stGov. Vi återanvänder inte officiella myndighetslogotyper eller deras identiteter.
+
+## Kommunimport (förberedd)
+
+Kör `node --test tests/*.test.mjs` och därefter `node scripts/import-municipalities.mjs` i Codespaces. Följ `docs/DATA_IMPORT.md`. Scriptet kräver nätverk, stoppar ofullständiga importer och gissar inga webbadresser.

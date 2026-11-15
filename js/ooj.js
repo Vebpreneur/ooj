@@ -1,6 +1,15 @@
 (function(){
 "use strict";
 const db=window.OOJ_DATA||{organizations:[],topics:[]},app=document.getElementById("app");
+// Nationella kommunnamn och kommunkoder laddas från en separat genererad fil.
+// Befintliga redaktionella poster behåller sina kända URL:er; övriga saknar URL
+// tills länkarna granskats. Gissa aldrig fram en officiell webbplats.
+const imported=Array.isArray(window.OOJ_MUNICIPALITIES)?window.OOJ_MUNICIPALITIES:[];
+const municipalityNames=new Set(db.organizations.filter(o=>o.type==="kommun").map(o=>o.name.toLocaleLowerCase("sv-SE")));
+const newMunicipalities=imported
+  .filter(x=>x&&/^\d{4}$/.test(x.code)&&typeof x.name==="string"&&!municipalityNames.has(x.name.toLocaleLowerCase("sv-SE")))
+  .map(x=>({id:"K-"+x.code,code:x.code,name:x.name,type:"kommun",description:"Kommun i Sverige",url:null,tags:[]}));
+db.organizations.push(...newMunicipalities);
 const $=(s,root=document)=>root.querySelector(s);
 const escape=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const fold=s=>String(s??"").toLocaleLowerCase("sv-SE").normalize("NFD").replace(/[\u0300-\u036f]/g,"");
@@ -19,16 +28,16 @@ return '<section class="hero"><div class="container"><div class="hero-inner"><sp
 function orgDirectory(type="alla"){
 const names={alla:["Sök i OOJ","Sök bland de organisationer som hittills lagts in i katalogen."],kommun:["Kommuner","Hitta svenska kommuner och gå vidare till deras officiella webbplatser."],myndighet:["Myndigheter","Sök bland statliga myndigheter och andra hittills registrerade offentliga aktörer."],region:["Regioner","Utforska regioner och deras officiella webbplatser."]};
 const n=names[type],label=type==="alla"?"Sök":type==="kommun"?"Kommuner":type==="myndighet"?"Myndigheter":"Regioner";
-return shell(n[0],n[1],escape(label),'<div class="toolbar"><input id="dir-search" type="search" placeholder="Sök namn, ort eller ansvarsområde…" aria-label="Sök organisationer" value="'+escape(state.q)+'"><select id="dir-type" aria-label="Filtrera typ"><option value="alla">Alla organisationer</option><option value="kommun">Kommuner</option><option value="myndighet">Myndigheter</option><option value="region">Regioner</option></select></div><div class="result-count" id="count" aria-live="polite"></div><div class="org-list" id="results"></div><div class="pagination" id="pager"></div><p class="note" style="margin-top:27px">Katalogen innehåller för närvarande ett redaktionellt urval, inte alla Sveriges organisationer. Fullständig registerimport och verifiering av länkar återstår.</p>');
+return shell(n[0],n[1],escape(label),'<div class="toolbar"><input id="dir-search" type="search" placeholder="Sök namn, ort eller ansvarsområde…" aria-label="Sök organisationer" value="'+escape(state.q)+'"><select id="dir-type" aria-label="Filtrera typ"><option value="alla">Alla organisationer</option><option value="kommun">Kommuner</option><option value="myndighet">Myndigheter</option><option value="region">Regioner</option></select></div><div class="result-count" id="count" aria-live="polite"></div><div class="org-list" id="results"></div><div class="pagination" id="pager"></div><p class="note" style="margin-top:27px">Kommunuppgifter kan importeras från Kolada. Webbplatser visas först när de har verifierats. Myndighets- och regionregistret är ännu inte komplett.</p>');
 }
 function profile(id){
 const o=db.organizations.find(x=>x.id===Number(id));
 if(!o)return notFound();
-const url=new URL(o.url),domain=url.hostname;
+const domain=o.url?new URL(o.url).hostname:null;
 const subject=o.type==="kommun"?"Kommuner":o.type==="region"?"Regioner":"Myndigheter",subjectLink=o.type==="kommun"?"kommuner":o.type==="region"?"regioner":"myndigheter";
-const searchURL="https://www.google.com/search?q="+encodeURIComponent("site:"+domain+" ");
+const searchURL=o.url?"https://www.google.com/search?q="+encodeURIComponent("site:"+domain+" "):null;
 return shell(o.name,o.description,'<a href="#/'+subjectLink+'">'+subject+'</a> / '+escape(o.name),
-'<div class="profile-grid"><div><div class="panel"><div class="label">Om organisationen</div><h2>'+escape(o.name)+'</h2><p>'+escape(o.description)+'. På organisationens egen webbplats hittar du aktuell och detaljerad information, kontaktuppgifter och eventuella e-tjänster.</p><a class="official-button" href="'+escape(o.url)+'" target="_blank" rel="noopener noreferrer">Besök officiell webbplats ↗</a></div><div class="panel"><h2>Hitta information hos '+escape(o.name)+'</h2><p>Behöver du en blankett eller en specifik tjänst? Använd webbplatsens egna sökfunktion eller sök på organisationens domän.</p><a class="text-link" href="'+escape(searchURL)+'" target="_blank" rel="noopener noreferrer">Sök på '+escape(domain)+' via extern sökmotor ↗</a><p class="note">Extern sökning öppnas hos Google och kan även visa annat än officiellt innehåll. OOJ kontrollerar ännu inte träffarna i den externa sökningen.</p></div></div><aside><div class="panel"><div class="label">Organisationstyp</div><div class="detail">'+escape(kinds[o.type])+'</div><div class="label">Officiell webbplats</div><div class="detail"><a class="text-link" href="'+escape(o.url)+'" target="_blank" rel="noopener noreferrer">'+escape(domain)+' ↗</a></div><div class="label">Profilstatus</div><div class="detail">Första katalogversionen</div><div class="note">OOJ är en fristående informationsportal. Kontrollera alltid aktuell information hos organisationen.</div></div></aside></div>');
+'<div class="profile-grid"><div><div class="panel"><div class="label">Om organisationen</div><h2>'+escape(o.name)+'</h2><p>'+escape(o.description)+'. Hos organisationen hittar du aktuell och detaljerad information, kontaktuppgifter och eventuella e-tjänster.</p>'+(o.url?'<a class="official-button" href="'+escape(o.url)+'" target="_blank" rel="noopener noreferrer">Besök officiell webbplats ↗</a>':'<p class="note">Officiell webbplats är ännu inte verifierad. Vi visar därför ingen gissad länk.</p>')+'</div><div class="panel"><h2>Hitta information hos '+escape(o.name)+'</h2>'+(o.url?'<p>Behöver du en blankett eller en specifik tjänst? Använd webbplatsens egna sökfunktion eller sök på organisationens domän.</p><a class="text-link" href="'+escape(searchURL)+'" target="_blank" rel="noopener noreferrer">Sök på '+escape(domain)+' via extern sökmotor ↗</a><p class="note">Extern sökning öppnas hos Google och kan även visa annat än officiellt innehåll. OOJ kontrollerar ännu inte träffarna i den externa sökningen.</p>':'<p>Vi kompletterar organisationsprofilen när webbplatsen verifierats mot en officiell källa.</p>')+'</div></div><aside><div class="panel"><div class="label">Organisationstyp</div><div class="detail">'+escape(kinds[o.type])+'</div>'+(o.code?'<div class="label">Kommunkod</div><div class="detail">'+escape(o.code)+'</div>':'')+'<div class="label">Officiell webbplats</div><div class="detail">'+(o.url?'<a class="text-link" href="'+escape(o.url)+'" target="_blank" rel="noopener noreferrer">'+escape(domain)+' ↗</a>':'Ännu inte verifierad')+'</div><div class="label">Profilstatus</div><div class="detail">'+(o.code?'Kommunuppgift från Kolada':'Första katalogversionen')+'</div><div class="note">OOJ är en fristående informationsportal. Kontrollera alltid aktuell information hos organisationen.</div></div></aside></div>');
 }
 function topics(){return shell("Ämnesområden","Utforska vanliga frågor och hitta organisationer som kan vara relevanta för ditt ärende.","Ämnesområden",'<div class="topic-grid">'+db.topics.map(topicCard).join("")+'</div>')}
 function topicPage(slug){
@@ -40,7 +49,9 @@ function notFound(){return shell("Sidan hittades inte","Adressen verkar inte st�
 function renderResults(){
 const input=$("#dir-search"),select=$("#dir-type");if(!input)return;
 const q=fold(input.value.trim()),type=select.value;
-let matches=db.organizations.filter(o=>(type==="alla"||o.type===type)&&(!q||fold([o.name,o.description,o.type,...o.tags].join(" ")).includes(q)));
+const parts=q.split(/\s+/).filter(Boolean);
+let matches=db.organizations.filter(o=>(type==="alla"||o.type===type)&&(!parts.length||parts.every(part=>fold([o.name,o.description,o.type,...o.tags].join(" ")).includes(part))));
+matches.sort((a,b)=>a.name.localeCompare(b.name,"sv"));
 const limit=12,total=Math.max(1,Math.ceil(matches.length/limit));state.page=Math.min(state.page,total);
 $("#count").textContent=matches.length+" organisationer i vårt första urval";
 $("#results").innerHTML=matches.length?matches.slice((state.page-1)*limit,state.page*limit).map(orgCard).join(""):'<div class="empty"><h3>Inga träffar i katalogen</h3><p>Prova ett annat namn eller ämne. Vi har ännu inte importerat hela det svenska organisationsregistret.</p></div>';
