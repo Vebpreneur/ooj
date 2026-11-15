@@ -5,9 +5,11 @@ const db=window.OOJ_DATA||{organizations:[],topics:[]},app=document.getElementBy
 // Befintliga redaktionella poster behåller sina kända URL:er; övriga saknar URL
 // tills länkarna granskats. Gissa aldrig fram en officiell webbplats.
 const imported=Array.isArray(window.OOJ_MUNICIPALITIES)?window.OOJ_MUNICIPALITIES:[];
-const municipalityNames=new Set(db.organizations.filter(o=>o.type==="kommun").map(o=>o.name.toLocaleLowerCase("sv-SE")));
+const municipalityKey=name=>String(name).toLocaleLowerCase("sv-SE")
+  .replace(/\s+(?:kommun|stad)$/,"").replace(/s$/,"");
+const municipalityNames=new Set(db.organizations.filter(o=>o.type==="kommun").map(o=>municipalityKey(o.name)));
 const newMunicipalities=imported
-  .filter(x=>x&&/^\d{4}$/.test(x.code)&&typeof x.name==="string"&&!municipalityNames.has(x.name.toLocaleLowerCase("sv-SE")))
+  .filter(x=>x&&/^\d{4}$/.test(x.code)&&typeof x.name==="string"&&!municipalityNames.has(municipalityKey(x.name)))
   .map(x=>({id:"K-"+x.code,code:x.code,name:x.name,type:"kommun",description:"Kommun i Sverige",url:null,tags:[]}));
 db.organizations.push(...newMunicipalities);
 const $=(s,root=document)=>root.querySelector(s);
@@ -31,7 +33,7 @@ const n=names[type],label=type==="alla"?"Sök":type==="kommun"?"Kommuner":type==
 return shell(n[0],n[1],escape(label),'<div class="toolbar"><input id="dir-search" type="search" placeholder="Sök namn, ort eller ansvarsområde…" aria-label="Sök organisationer" value="'+escape(state.q)+'"><select id="dir-type" aria-label="Filtrera typ"><option value="alla">Alla organisationer</option><option value="kommun">Kommuner</option><option value="myndighet">Myndigheter</option><option value="region">Regioner</option></select></div><div class="result-count" id="count" aria-live="polite"></div><div class="org-list" id="results"></div><div class="pagination" id="pager"></div><p class="note" style="margin-top:27px">Kommunuppgifter kan importeras från Kolada. Webbplatser visas först när de har verifierats. Myndighets- och regionregistret är ännu inte komplett.</p>');
 }
 function profile(id){
-const o=db.organizations.find(x=>x.id===Number(id));
+const o=db.organizations.find(x=>String(x.id)===String(id));
 if(!o)return notFound();
 const domain=o.url?new URL(o.url).hostname:null;
 const subject=o.type==="kommun"?"Kommuner":o.type==="region"?"Regioner":"Myndigheter",subjectLink=o.type==="kommun"?"kommuner":o.type==="region"?"regioner":"myndigheter";
