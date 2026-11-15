@@ -20,7 +20,7 @@ python3 -m http.server 8000
 - Katalogsökning efter namn och ansvarsområde, typfilter samt paginering.
 - Organisationsprofiler med tydliga externa länkar där webbplatsen är känd.
 - Ämnesområden med vägar vidare till relevanta organisationer.
-- Förberedd kommunimport från Kolada API v3. Förrän importen körs är förteckningen **inte komplett**.
+- **Samtliga 290 kommuner** är nu inlagda från SCB:s 2026-förteckning, med kommunkod och relation till respektive län.
 
 ### Importera kommunförteckningen
 
@@ -37,7 +37,7 @@ För detaljer, se [dataimport](docs/DATA_IMPORT.md).
 
 ### Kommande utveckling
 
-1. Importera alla 290 kommuner och verifiera deras officiella webbadresser separat.
+1. Verifiera officiella webbadresser för alla 290 kommuner.
 2. Importera statliga myndigheter och regioner via officiella register.
 3. Koppla sökresultaten till dokument, blanketter och e-tjänster hos ursprungskällorna.
 4. Kontrollera och eventuellt integrera färdiga komponenter från Helsinki Design System med användarens godkännande.
@@ -53,7 +53,7 @@ Ingen statistikportal eller AI-funktion implementeras i denna fas.
 | `css/ooj.css` | Nuvarande OOJ-stilar |
 | `js/ooj.js` | Navigation, sökning och profilsidor |
 | `js/ooj-data.js` | Manuellt starturval av organisationer |
-| `js/ooj-municipalities.js` | Genererad kommunlista (tom tills importen körs) |
+| `js/ooj-municipalities.js` | SCB:s kompletta kommunlista, 290 poster |
 | `scripts/import-municipalities.mjs` | Import med validering |
 | `tests/` | Tester för import och datavalidering |
 | `OOJ_COMPONENT_AUDIT.md` | Inventering och komponentförslag som kräver godkännande |
@@ -68,3 +68,7 @@ OpenGovUI av [pasan93](https://github.com/pasan93/opengovui) är grunden till fo
 ### Ändringar och lagring
 
 Allt arbete görs i GitHub-repot. **ShipStatic, Netlify och Vercel är inte källkodslagring för OOJ.** Förhandsvisningar kan användas separat men är aldrig den enda kopian av projektet.
+
+## Komplett kommunregister (2026-11-15)
+
+Samtliga 290 kommuner är nu checkade in i `js/ooj-municipalities.js` med officiell 2026-kod och namn från [SCB](https://www.scb.se/hitta-statistik/regional-statistik-och-kartor/regionala-indelningar/lan-och-kommuner/lan-och-kommuner-i-kodnummerordning/). Kolada-skriptet är fortsatt ett alternativ för senare uppdatering, men ska inte köras oavsiktligt eftersom det skulle skriva över den kontrollerade SCB-filens data. Katalogen har 50 träffar per sida. **Myndigheter och regioner är fortfarande bara ett första urval.**

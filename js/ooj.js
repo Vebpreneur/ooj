@@ -12,9 +12,19 @@ const imported=Array.isArray(window.OOJ_MUNICIPALITIES)&&window.OOJ_MUNICIPALITI
 
 const municipalityKey=name=>String(name).toLocaleLowerCase("sv-SE")
   .replace(/\s+(?:kommun|stad)$/,"").replace(/s$/,"");
-const municipalityNames=new Set(db.organizations.filter(o=>o.type==="kommun").map(o=>municipalityKey(o.name)));
+const existingMunicipalities=db.organizations.filter(o=>o.type==="kommun");
+const curatedCodes=Object.fromEntries(Object.entries(geo.curatedCountyCodes)
+  .filter(([name])=>existingMunicipalities.some(o=>o.name===name)));
+const assigned=new Set();
+// Map all curated municipality pages onto the official SCB code, retaining their URLs.
+for(const entry of imported){
+  const old=existingMunicipalities.find(o=>!assigned.has(o)&&municipalityKey(o.name)===municipalityKey(entry.name)
+    &&(!curatedCodes[o.name]||curatedCodes[o.name]===entry.code.slice(0,2)));
+  if(old){old.code=entry.code;assigned.add(old);}
+}
+const mappedCodes=new Set(existingMunicipalities.filter(o=>o.code).map(o=>o.code));
 const newMunicipalities=imported
-  .filter(x=>x&&/^\d{4}$/.test(x.code)&&typeof x.name==="string"&&!municipalityNames.has(municipalityKey(x.name)))
+  .filter(x=>x&&/^\d{4}$/.test(x.code)&&typeof x.name==="string"&&!mappedCodes.has(x.code))
   .map(x=>({id:"K-"+x.code,code:x.code,name:x.name,type:"kommun",description:"Kommun i Sverige",url:null,tags:[]}));
 db.organizations.push(...newMunicipalities);
 db.organizations.forEach(o=>{
@@ -39,7 +49,7 @@ return '<section class="hero"><div class="container"><div class="hero-inner"><sp
 +'<section class="section white"><div class="container"><div class="section-head"><div><span class="eyebrow" style="color:var(--blue)">Utforska OOJ</span><h2>Hitta rätt organisation.</h2><p>Välj var du vill börja. Varje organisation får en egen sida med en väg till originalkällan.</p></div></div><div class="card-grid"><a class="card" href="#/kommuner"><div class="card-icon">⌂</div><h3>Kommuner</h3><p>Hitta kommunal service, information och officiella webbplatser.</p></a><a class="card" href="#/myndigheter"><div class="card-icon">▤</div><h3>Myndigheter</h3><p>Hitta nationella myndigheter, ansvarsområden och kontaktvägar.</p></a><a class="card" href="#/regioner"><div class="card-icon">✚</div><h3>Regioner</h3><p>Utforska regionala organisationer och deras webbplatser.</p></a></div></div></section>'
 +'<section class="section"><div class="container"><div class="section-head"><div><span class="eyebrow" style="color:var(--blue)">Vanliga områden</span><h2>Vad behöver du hjälp med?</h2><p>Vi hjälper dig att hitta vilken offentlig aktör som kan vara relevant.</p></div><a class="text-link" href="#/lan">Utforska Sveriges län ↗</a></div><div class="topic-grid">'+db.topics.map(topicCard).join("")+'</div></div></section>'
 +'<section class="feature-band"><div class="container band-grid"><div><span class="eyebrow" style="color:#bac7ff">Hitta källan</span><h2>Rätt information finns ofta redan.</h2><p>OOJ ska göra det enklare att hitta den. Vi visar vägen till ansvariga organisationer, och du går vidare direkt till deras officiella webbplatser.</p></div><div class="band-links"><a href="#/sok">Sök i organisationskatalogen <span>↗</span></a><a href="#/myndigheter">Utforska myndigheter <span>↗</span></a><a href="#/om">Så fungerar OOJ <span>↗</span></a></div></div></section>'
-+'<section class="section white"><div class="container"><div class="section-head"><div><h2>Utvalda organisationer.</h2><p>Ett första urval. En komplett import från officiella register är nästa steg.</p></div><a class="text-link" href="#/sok">Visa katalogen ↗</a></div><div class="org-list">'+[0,1,2,18].map(i=>db.organizations[i]).filter(Boolean).map(orgCard).join("")+'</div></div></section>'}
++'<section class="section white"><div class="container"><div class="section-head"><div><h2>Utvalda organisationer.</h2><p>Kommunerna finns i SCB:s rikstäckande register. Vi fortsätter bygga ut myndigheter och regioner.</p></div><a class="text-link" href="#/sok">Visa katalogen ↗</a></div><div class="org-list">'+[0,1,2,18].map(i=>db.organizations[i]).filter(Boolean).map(orgCard).join("")+'</div></div></section>'}
 function countyCard(c){
 const n=db.organizations.filter(o=>o.type==="kommun"&&o.countyCode===c.code).length;
 return '<a href="'+countyHref(c.code)+'" class="card topic-card"><div class="card-icon">⌂</div><h3>'+escape(c.name)+'</h3><p>'+n+' kommuner i katalogen · Utforska länet ↗</p></a>';
@@ -55,14 +65,14 @@ const municipalities=members.filter(o=>o.type==="kommun").sort((a,b)=>a.name.loc
 const regional=members.filter(o=>o.type!=="kommun");
 return shell(c.name,"Kommuner och regionala offentliga organisationer med verifierad koppling till "+c.name+".",
 '<a href="#/lan">Län</a> / '+escape(c.name),
-'<div class="panel"><h2>Kommuner i '+escape(c.short)+'</h2><p>'+municipalities.length+' kommuner finns för närvarande i OOJ för detta län. Namn och kommunkoder hämtas från officiell regional indelning.</p></div><div class="org-list">'+(municipalities.length?municipalities.map(orgCard).join(""):'<div class="empty"><h3>Kommuner importeras</h3><p>Det finns ännu inga registrerade kommuner för länet i denna version.</p></div>')+'</div>'
+'<div class="panel"><h2>Kommuner i '+escape(c.short)+'</h2><p>'+municipalities.length+' kommuner finns för närvarande i OOJ för detta län. Namn och kommunkoder hämtas från officiell regional indelning.</p></div><div class="org-list">'+(municipalities.length?municipalities.map(orgCard).join(""):'<div class="empty"><h3>Kommuner saknas</h3><p>Det finns ännu inga registrerade kommuner för länet i denna version.</p></div>')+'</div>'
 +(regional.length?'<div class="panel" style="margin-top:30px"><h2>Regionala offentliga organisationer</h2><p>Organisationer som hittills kopplats till länet.</p></div><div class="org-list">'+regional.map(orgCard).join("")+'</div>':'')
 +'<p class="note" style="margin-top:24px">Statliga myndigheter med nationellt ansvarsområde listas inte automatiskt som lokala länsorganisationer. Relationer läggs till först när de är verifierade.</p>');
 }
 function orgDirectory(type="alla"){
-const names={alla:["Sök i OOJ","Sök bland de organisationer som hittills lagts in i katalogen."],kommun:["Kommuner","Hitta svenska kommuner och gå vidare till deras officiella webbplatser."],myndighet:["Myndigheter","Sök bland statliga myndigheter och andra hittills registrerade offentliga aktörer."],region:["Regioner","Utforska regioner och deras officiella webbplatser."]};
+const names={alla:["Sök i OOJ","Sök bland Sveriges kommuner och de offentliga organisationer som hittills registrerats."],kommun:["Kommuner","Hitta svenska kommuner och gå vidare till deras officiella webbplatser."],myndighet:["Myndigheter","Sök bland statliga myndigheter och andra hittills registrerade offentliga aktörer."],region:["Regioner","Utforska regioner och deras officiella webbplatser."]};
 const n=names[type],label=type==="alla"?"Sök":type==="kommun"?"Kommuner":type==="myndighet"?"Myndigheter":"Regioner";
-return shell(n[0],n[1],escape(label),'<div class="toolbar"><input id="dir-search" type="search" placeholder="Sök namn, ort eller ansvarsområde…" aria-label="Sök organisationer" value="'+escape(state.q)+'"><select id="dir-type" aria-label="Filtrera typ"><option value="alla">Alla organisationer</option><option value="kommun">Kommuner</option><option value="myndighet">Myndigheter</option><option value="region">Regioner</option></select><select id="dir-county" aria-label="Filtrera län"><option value="">Alla län</option>'+geo.counties.map(c=>'<option value="'+escape(c.code)+'">'+escape(c.name)+'</option>').join("")+'</select></div><div class="result-count" id="count" aria-live="polite"></div><div class="org-list" id="results"></div><div class="pagination" id="pager"></div><p class="note" style="margin-top:27px">Kommunuppgifter kan importeras från Kolada. Webbplatser visas först när de har verifierats. Myndighets- och regionregistret är ännu inte komplett.</p>');
+return shell(n[0],n[1],escape(label),'<div class="toolbar"><input id="dir-search" type="search" placeholder="Sök namn, ort eller ansvarsområde…" aria-label="Sök organisationer" value="'+escape(state.q)+'"><select id="dir-type" aria-label="Filtrera typ"><option value="alla">Alla organisationer</option><option value="kommun">Kommuner</option><option value="myndighet">Myndigheter</option><option value="region">Regioner</option></select><select id="dir-county" aria-label="Filtrera län"><option value="">Alla län</option>'+geo.counties.map(c=>'<option value="'+escape(c.code)+'">'+escape(c.name)+'</option>').join("")+'</select></div><div class="result-count" id="count" aria-live="polite"></div><div class="org-list" id="results"></div><div class="pagination" id="pager"></div><p class="note" style="margin-top:27px">Kommunregistret omfattar 290 kommuner från SCB 2026. Officiella webbadresser visas bara när de har verifierats. Myndigheter och regioner är ännu inte kompletta.</p>');
 }
 function profile(id){
 const o=db.organizations.find(x=>String(x.id)===String(id));
@@ -88,9 +98,9 @@ const parts=q.split(/\s+/).filter(Boolean);
 const county=$("#dir-county").value;
 let matches=db.organizations.filter(o=>(type==="alla"||o.type===type)&&(!county||o.countyCode===county)&&(!parts.length||parts.every(part=>fold([o.name,o.description,o.type,...o.tags,countyAliases(o.countyCode)].join(" ")).includes(part))));
 matches.sort((a,b)=>a.name.localeCompare(b.name,"sv"));
-const limit=12,total=Math.max(1,Math.ceil(matches.length/limit));state.page=Math.min(state.page,total);
+const limit=50,total=Math.max(1,Math.ceil(matches.length/limit));state.page=Math.min(state.page,total);
 $("#count").textContent=matches.length+" organisationer i katalogen";
-$("#results").innerHTML=matches.length?matches.slice((state.page-1)*limit,state.page*limit).map(orgCard).join(""):'<div class="empty"><h3>Inga träffar i katalogen</h3><p>Prova ett annat namn eller ämne. Vi har ännu inte importerat hela det svenska organisationsregistret.</p></div>';
+$("#results").innerHTML=matches.length?matches.slice((state.page-1)*limit,state.page*limit).map(orgCard).join(""):'<div class="empty"><h3>Inga träffar i katalogen</h3><p>Prova ett annat namn eller ämne. Prova ett annat namn eller län.</p></div>';
 $("#pager").innerHTML=matches.length>limit?'<button type="button" id="prev" '+(state.page===1?"disabled":"")+'>← Föregående</button><span>Sida '+state.page+' av '+total+'</span><button type="button" id="next" '+(state.page===total?"disabled":"")+'>Nästa →</button>':"";
 $("#prev")?.addEventListener("click",()=>{state.page--;renderResults();$("#results")?.scrollIntoView({block:"start"})});
 $("#next")?.addEventListener("click",()=>{state.page++;renderResults();$("#results")?.scrollIntoView({block:"start"})});

@@ -111,68 +111,7 @@ window.OOJ_GEO = {
     "short": "Norrbotten"
   }
 ],
- initialMunicipalities: [
-  {
-    "code": "2021",
-    "name": "Vansbro"
-  },
-  {
-    "code": "2023",
-    "name": "Malung-Sälen"
-  },
-  {
-    "code": "2026",
-    "name": "Gagnef"
-  },
-  {
-    "code": "2029",
-    "name": "Leksand"
-  },
-  {
-    "code": "2031",
-    "name": "Rättvik"
-  },
-  {
-    "code": "2034",
-    "name": "Orsa"
-  },
-  {
-    "code": "2039",
-    "name": "Älvdalen"
-  },
-  {
-    "code": "2061",
-    "name": "Smedjebacken"
-  },
-  {
-    "code": "2062",
-    "name": "Mora"
-  },
-  {
-    "code": "2080",
-    "name": "Falun"
-  },
-  {
-    "code": "2081",
-    "name": "Borlänge"
-  },
-  {
-    "code": "2082",
-    "name": "Säter"
-  },
-  {
-    "code": "2083",
-    "name": "Hedemora"
-  },
-  {
-    "code": "2084",
-    "name": "Avesta"
-  },
-  {
-    "code": "2085",
-    "name": "Ludvika"
-  }
-],
+ initialMunicipalities: [],
  // Explicit koppling för redaktionellt urval: namn → länskod, inte national agency.
  curatedCountyCodes: {
   "Stockholms stad": "01",
