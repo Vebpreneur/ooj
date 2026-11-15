@@ -1,378 +1,70 @@
-# OpenGovUI
+# OOJ
 
-![Licence](https://img.shields.io/badge/licence-MIT-blue.svg)
-![Version](https://img.shields.io/badge/version-2.1.0-green.svg)
-![Static Template](https://img.shields.io/badge/static%20template-v1.2.0-blue.svg)
-![WordPress CMS](https://img.shields.io/badge/wordpress%20cms-v2.1.0-green.svg)
+**OOJ** är en fristående svensk sök- och informationsportal under utveckling. Projektet utgår från den öppna webbplatsmallen **OpenGovUI**, men har en egen svensk startsida, en första organisationskatalog och ett eget varumärke.
 
-<img width="1399" alt="image" src="https://github.com/user-attachments/assets/16597505-da85-4ffd-8ddc-6b598f2afa2b">
+> OOJ är inte en svensk myndighet och har ingen officiell anslutning till de organisationer som listas.
 
-A 100% open source modern, accessible, and multilingual website template designed specifically for government portals. Available as both a **static HTML template** and a **full WordPress CMS solution** with advanced multilingual support.
+## Visa projektet lokalt eller i GitHub Codespaces
 
-[Live Demo](https://govui.openxs.org)
+Ingen deployment och inga API-nycklar behövs för att förhandsgranska den statiska versionen.
 
-## 🚀 **Two Deployment Options**
-
-### 📄 **Option 1: Static Template** *(Recommended for simple sites)*
-Perfect for straightforward government portals that don't need content management.
-
-- **✅ No server required** - Works with any web hosting
-- **✅ Fast loading** - Pure HTML/CSS/JavaScript
-- **✅ Easy deployment** - Just upload files
-- **✅ No database needed**
-
-### 🎛️ **Option 2: WordPress CMS** *(Recommended for dynamic content)*
-Full content management system with advanced multilingual support and admin interface.
-
-- **✅ Admin dashboard** - Manage content without coding
-- **✅ Custom post types** - Services, Categories, Government Updates
-- **✅ Polylang integration** - Professional multilingual support
-- **✅ REST API** - Advanced integration capabilities
-- **✅ Content population** - Automated content creation system
-- **✅ AI Translation System** - Claude Sonnet 3.7 powered auto-translation
-
----
-
-## 🌟 Features
-
-### 📱 Responsive Design
-- Mobile-first approach
-- Fluid layouts that work across all device sizes
-- Optimised navigation for both desktop and mobile users
-
-### ♿ Accessibility
-- Skip to main content functionality
-- ARIA labels where necessary
-- Semantic HTML structure
-- Government accessibility standards compliant
-
-### 🌐 Advanced Multilingual Support
-- **Polylang Integration**: Professional WordPress multilingual plugin support
-- **Language Syncing**: Automatic synchronization of meta fields across translations
-- **Smart Language Detection**: Automatic language mapping and detection
-- **AI-Powered Translation**: Claude Sonnet 3.7 API integration for intelligent translations
-- **Auto-Translation Manager**: Automated filling of missing translations with admin interface
-- **Translation Scanning**: Intelligent detection of missing translations across all content
-- **Content Synchronization**: Seamless content management across all languages
-- Full support for **English (en_GB, en_US)**, **Sinhala (si_LK)**, and **Tamil (ta_LK)**
-
-### 🎨 Design Features [[memory:3285333]]
-- Clean, professional government aesthetic with rounded, easy-to-read fonts
-- FontAwesome 6.5.1 icons (CDN hosted)
-- Service cards with intuitive icons
-- Grid-based layouts for services and topics
-- Social media integration
-- Custom color schemes for categories
-
-### 🔧 WordPress CMS Advanced Features
-- **Custom Post Types**: 
-  - Government Services with rich metadata
-  - Service Categories with icons and colors
-  - Government Updates with featured content
-- **Enhanced REST API**: Custom endpoints for all content types
-- **Content Population System**: One-click content creation with sample data
-- **Meta Field Management**: Service URLs, processing times, requirements, featured status
-- **Admin Interface**: Custom admin pages for content management
-- **Language-Aware Content**: All content respects current language context
-
-### 🤖 AI-Powered Translation System
-- **Claude Sonnet 3.7 Integration**: Advanced AI for contextually accurate translations
-- **Intelligent Translation Manager**: 
-  - Scans all content for missing translations
-  - Automatically fills gaps using AI
-  - Maintains translation consistency across the site
-- **Admin Dashboard**: Easy-to-use interface for managing translations
-  - One-click translation scanning
-  - Bulk auto-translation capabilities  
-  - Translation backup and restore
-- **Multi-Language Support**: Seamlessly translates between English, Sinhala, and Tamil
-- **Government-Specific Context**: AI trained to understand government terminology and formal language
-- **API Key Management**: Secure configuration for Claude API integration
-
----
-
-## 🚀 **Quick Start - Static Template**
-
-Perfect for simple government portals. No server or database required.
-
-### Download Static Template
 ```bash
-# Get the static template (v1.2.0)
-git clone -b v1.2.0 https://github.com/pasan93/opengovui.git opengovui-static
-cd opengovui-static
+python3 -m http.server 8000
 ```
 
-### Deploy
-1. **Local Development:**
-   ```bash
-   python3 -m http.server 3000
-   ```
-   Open http://localhost:3000
+Öppna `http://localhost:8000` eller port **8000** via **Ports** i Codespaces.
 
-2. **Production:** Upload files to any web hosting service
+### Vad fungerar idag?
 
----
+- Svensk OOJ-startsida, responsiv navigation och ett första urval av organisationer.
+- Katalogsökning efter namn och ansvarsområde, typfilter samt paginering.
+- Organisationsprofiler med tydliga externa länkar där webbplatsen är känd.
+- Ämnesområden med vägar vidare till relevanta organisationer.
+- Förberedd kommunimport från Kolada API v3. Förrän importen körs är förteckningen **inte komplett**.
 
-## 🎛️ **Quick Start - WordPress CMS**
+### Importera kommunförteckningen
 
-Full content management system with advanced multilingual capabilities.
+Inga externa beroenden behöver installeras; Node.js 18+ rekommenderas.
 
-### Requirements
-- **PHP 8.4+**
-- **MariaDB/MySQL**
-- **Web server** (Apache/Nginx) or PHP built-in server
-- **Polylang Plugin** (for full multilingual support)
-
-### Installation
 ```bash
-# Get the WordPress version (v2.1.0)
-git clone https://github.com/pasan93/opengovui.git opengovui-cms
-cd opengovui-cms
+node --test tests/*.test.mjs
+node scripts/import-municipalities.mjs
 ```
 
-### Setup WordPress
-1. **Download WordPress Core:**
-   ```bash
-   curl -O https://wordpress.org/latest.tar.gz
-   tar -xzf latest.tar.gz
-   cp -r wordpress/* .
-   rm -rf wordpress latest.tar.gz
-   ```
+Importskriptet kräver internetåtkomst. Vid giltigt svar genereras `js/ooj-municipalities.js` med namn och kommunkoder. **Kom ihåg att committa den genererade filen**, annars finns den bara i din utvecklingsmiljö. Källan anges som **Kolada (RKA)**.
 
-2. **Setup Database:**
-   ```bash
-   mariadb -u root < setup_database.sql
-   ```
+För detaljer, se [dataimport](docs/DATA_IMPORT.md).
 
-3. **Start Server:**
-   ```bash
-   php -S localhost:8080
-   ```
+### Kommande utveckling
 
-4. **Complete Installation:**
-   - Open http://localhost:8080
-   - Follow WordPress installation wizard
-   - **Install Polylang Plugin** for multilingual support
-   - Activate "OpenGovUI" theme
-   - **Configure AI Translation** (Optional):
-     - Add your Claude API key to wp-config.php: `define('CLAUDE_API_KEY', 'your-api-key');`
-     - Or configure via WordPress admin: Tools → Auto Translation
-   - **Populate Content**: Use the built-in content population system
-   - **Auto-Translate Content**: Access Tools → Auto Translation for AI-powered translations
-   - Start managing government services and content!
+1. Importera alla 290 kommuner och verifiera deras officiella webbadresser separat.
+2. Importera statliga myndigheter och regioner via officiella register.
+3. Koppla sökresultaten till dokument, blanketter och e-tjänster hos ursprungskällorna.
+4. Kontrollera och eventuellt integrera färdiga komponenter från Helsinki Design System med användarens godkännande.
+5. Utvärdera AI-baserad, källbelagd frågesökning i ett senare skede.
 
-📚 **[View Full WordPress Setup Guide](WORDPRESS_SETUP_GUIDE.md)**
+Ingen statistikportal eller AI-funktion implementeras i denna fas.
 
----
+### Teknik och struktur
 
-## 🔧 Structure
+| Sökväg | Innehåll |
+|---|---|
+| `index.html` | Svensk frontend |
+| `css/ooj.css` | Nuvarande OOJ-stilar |
+| `js/ooj.js` | Navigation, sökning och profilsidor |
+| `js/ooj-data.js` | Manuellt starturval av organisationer |
+| `js/ooj-municipalities.js` | Genererad kommunlista (tom tills importen körs) |
+| `scripts/import-municipalities.mjs` | Import med validering |
+| `tests/` | Tester för import och datavalidering |
+| `OOJ_COMPONENT_AUDIT.md` | Inventering och komponentförslag som kräver godkännande |
+| `wp-content/` | Kvarvarande WordPress-del från OpenGovUI |
 
-### Static Template Structure
-```
-opengovui-static/
-├── index.html          # Main page
-├── css/
-│   └── styles.css      # Styling
-├── js/
-│   ├── i18n.js        # Internationalization
-│   └── script.js      # Interactive features
-└── images/
-    └── govt-logo.png  # Government branding
-```
+### Temakällor
 
-### WordPress CMS Structure
-```
-opengovui-cms/
-├── wp-content/
-│   ├── themes/
-│   │   └── opengovui/           # Custom government theme
-│   │       ├── style.css        # Theme styles
-│   │       ├── index.php        # Main template
-│   │       ├── front-page.php   # Homepage template
-│   │       ├── header.php       # Header template
-│   │       ├── footer.php       # Footer template
-│   │       ├── functions.php    # Theme functionality
-│   │       ├── single-gov_service.php  # Service template
-│   │       ├── js/
-│   │       │   ├── multilingual.js     # Polylang integration
-│   │       │   └── admin-auto-translate.js
-│   │       └── includes/
-│   │           ├── content-populator.php
-│   │           └── translation-manager.php
-│   ├── plugins/
-│   │   └── polylang/           # Multilingual support
-│   └── languages/              # Translation files
-├── wp-config.php               # Database configuration
-├── setup_database.sql          # Database setup
-└── WORDPRESS_SETUP_GUIDE.md
-```
+OpenGovUI av [pasan93](https://github.com/pasan93/opengovui) är grunden till forken och licensierat under MIT. Relevanta designreferenser är Helsinki Design System, Norges Designsystemet och Designers Italia – Comune. Dessa är **inte installerade i OOJ** och en sådan integration kräver separat beslut.
 
----
+**OBS:** Den första OOJ-frontenden innehåller egen CSS skapad innan beslutet att prioritera temats befintliga komponenter. Den är bevarad tills ett godkänt komponentbyte görs.
 
-## 📚 Key Components
+### Ändringar och lagring
 
-### WordPress CMS Features (v2.1.0)
-
-#### Custom Post Types & REST API
-- **Government Services** (`/wp-json/wp/v2/gov_service`)
-  - Service icons, URLs, processing times
-  - Requirements and featured status
-  - Full multilingual support
-- **Service Categories** (`/wp-json/wp/v2/service_category`) 
-  - Custom icons and color schemes
-  - Multilingual category management
-- **Government Updates** (`/wp-json/wp/v2/gov_update`)
-  - Featured updates and announcements
-  - Date-based sorting and archives
-
-#### Enhanced API Endpoints
-```
-/wp-json/opengovui/v1/featured-services?lang=en  # Featured services
-/wp-json/opengovui/v1/categories?lang=si         # Service categories  
-/wp-json/opengovui/v1/updates?lang=ta           # Government updates
-/wp-json/opengovui/v1/services?lang=en          # All services
-```
-
-#### Content Population System
-- **One-Click Setup**: Automatically creates sample government content
-- **Multilingual Content**: Creates content in English, Sinhala, and Tamil
-- **Realistic Data**: Government services, categories, and updates
-- **Admin Interface**: Easy-to-use content management dashboard
-
-#### Polylang Integration
-- **Advanced Language Management**: Professional multilingual plugin support
-- **Meta Field Syncing**: Automatic synchronization of custom fields across languages
-- **Language Detection**: Smart language mapping and detection
-- **Translation Workflow**: Streamlined content translation process
-
-### i18n Implementation (Static Template)
-The template uses a straightforward i18n system:
-
-1. **HTML Markup**: Uses `data-i18n` attributes for translatable content:
-```html
-<h1 data-i18n="hero.title">Access government services and information in one place</h1>
-```
-
-2. **Language Selection**: Simple language switcher in the header:
-```html
-<div class="language-selector">
-    <a href="#" lang="si">සිංහල</a>
-    <a href="#" lang="ta">தமிழ்</a>
-    <a href="#" lang="en" class="active">English</a>
-</div>
-```
-
-### Main Sections
-- **Header** with Polylang language selector and search
-- **Hero section** with featured services from WordPress
-- **Topic categories** with dynamic icon navigation
-- **Government updates** with content management
-- **Footer** with important links and social media
-
----
-
-## 🔄 Customisation
-
-### WordPress CMS (Recommended)
-- **Admin Dashboard**: Full WordPress interface for content management
-- **Content Population**: Use the built-in system to create sample content
-- **Service Management**: Add/edit services with icons, URLs, and metadata
-- **Category Management**: Create categories with custom colors and icons
-- **Update Publishing**: Manage government announcements and news
-- **Multilingual Content**: Full translation support via Polylang
-- **Custom Fields**: Rich metadata for all content types
-
-### Static Template
-- Edit the HTML directly to change content
-- Update the `data-i18n` attributes and corresponding translation files
-- Modify icons by changing FontAwesome classes
-- Customize CSS for branding
-
-### Styling
-- WordPress version inherits all static template styling
-- Edit theme's `style.css` for WordPress-specific customizations
-- FontAwesome 6.5.1 included for comprehensive icon support
-- Custom color schemes available for categories
-
----
-
-## 🔌 Plugin Dependencies
-
-### Required for Full Functionality
-- **Polylang** (Free): Multilingual support
-  - Language management and switching
-  - Content translation workflow
-  - Meta field synchronization
-
-### Recommended
-- **Classic Editor**: For traditional WordPress editing experience
-- **Yoast SEO**: Enhanced SEO with multilingual support
-
----
-
-## 📋 **Version History**
-
-- **v2.1.0** - Enhanced WordPress CMS with Polylang Integration (Current)
-  - Full Polylang multilingual plugin support
-  - **AI-powered translation system** with Claude Sonnet 3.7 integration
-  - Advanced REST API endpoints
-  - Content population system
-  - Intelligent translation manager with admin dashboard
-  - Enhanced admin interface
-- **v2.0.0** - WordPress CMS Integration
-- **v1.2.0** - Complete Static Template with Tamil translations  
-- **v1.1.0** - Fira Sans typography update
-- **v1.0.0** - Initial static template release
-
----
-
-## 🚀 **API Documentation**
-
-### REST API Endpoints
-
-#### Custom OpenGovUI Endpoints
-```bash
-# Get featured services
-GET /wp-json/opengovui/v1/featured-services?lang=en
-
-# Get service categories  
-GET /wp-json/opengovui/v1/categories?lang=si
-
-# Get government updates
-GET /wp-json/opengovui/v1/updates?lang=ta
-
-# Get all services
-GET /wp-json/opengovui/v1/services?lang=en&category=health
-```
-
-#### Standard WordPress Endpoints
-```bash
-# Government Services
-GET /wp-json/wp/v2/gov_service
-
-# Service Categories
-GET /wp-json/wp/v2/service_category
-
-# Government Updates  
-GET /wp-json/wp/v2/gov_update
-```
-
-All endpoints support language parameters and return properly formatted content with metadata.
-
----
-
-## 📄 Licence
-
-This project is licensed under the MIT Licence - see the [LICENCE](LICENSE) file for details.
-
-## 🤝 Contributing
-
-Contributions are welcome! Feel free to submit pull requests or open issues for any improvements.
-
-## 📞 Support
-
-For support, please open an issue in the [GitHub repository](https://github.com/pasan93/opengovui/issues).
-
----
-
-Made with ❤️ in 🇱🇰 for better government services
+Allt arbete görs i GitHub-repot. **ShipStatic, Netlify och Vercel är inte källkodslagring för OOJ.** Förhandsvisningar kan användas separat men är aldrig den enda kopian av projektet.
