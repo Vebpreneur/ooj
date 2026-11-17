@@ -4,7 +4,8 @@ const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&
 const fold=s=>String(s||"").toLocaleLowerCase("sv-SE").normalize("NFD").replace(/[\u0300-\u036f]/g,"");
 const link=(url,text,klass="text-link")=>'<a class="'+klass+'" href="'+esc(url)+'" target="_blank" rel="noopener noreferrer">'+esc(text)+' ↗</a>';
 const item=l=>'<a class="org-result" href="'+esc(l.url)+'" target="_blank" rel="noopener noreferrer"><div class="org-avatar" aria-hidden="true">↗</div><div><h3>'+esc(l.title)+'</h3><p>'+esc(l.description)+'</p></div><span class="arrow" aria-hidden="true">↗</span></a>';
-function render(o,organizations,shell){
+function render(o,catalog,shell){
+const organizations=catalog.organizations;
 const d=window.OOJ_BORLANGE;
 const categories=d.groups.map(g=>'<details class="panel municipality-topic" id="topic-'+esc(g.id)+'"><summary><span class="topic-heading"><span class="label">'+g.links.length+' tjänster och informationssidor</span><strong>'+esc(g.title)+'</strong><span class="topic-description">'+esc(g.description)+'</span></span><span class="topic-toggle" aria-hidden="true">+</span></summary><div class="org-list">'+g.links.map(item).join("")+'</div></details>').join("");
 const region=organizations.find(x=>x.name==="Region Dalarna");
