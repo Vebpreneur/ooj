@@ -122,7 +122,7 @@ $("#prev")?.addEventListener("click",()=>{state.page--;renderResults();$("#resul
 $("#next")?.addEventListener("click",()=>{state.page++;renderResults();$("#results")?.scrollIntoView({block:"start"})});
 }
 function navigate(){
-const full=decodeURIComponent(location.hash.replace(/^#\/?/,"")||"");const [route,arg]=full.split("/");
+const full=decodeURIComponent(location.hash.replace(/^#\/?/,"")||"");const [route,rawArg]=full.split("/");const arg=rawArg?.split("?")[0];
 const directoryType=route==="kommuner"?"kommun":route==="myndigheter"?"myndighet":route==="regioner"?"region":"alla";
 app.innerHTML=route==="organisation"?profile(arg):route==="kommuner"||route==="myndigheter"||route==="regioner"||route==="sok"?orgDirectory(directoryType):route==="amnen"?topics():route==="amne"?topicPage(arg):route==="lan"?(arg?countyPage(arg):countiesPage()):route==="om"?about():route?notFound():home();
 document.title=(route?({kommuner:"Kommuner",myndigheter:"Myndigheter",regioner:"Regioner",sok:"Sök",amnen:"Ämnesområden",lan:"Län",organisation:"Organisation",amne:"Ämne",om:"Om OOJ"}[route]||"OOJ")+" | OOJ":"OOJ – Hitta rätt i Sveriges offentliga sektor");
