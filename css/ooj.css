@@ -14,3 +14,20 @@
 @media(max-width:900px){.desktop-nav,.header-cta{display:none}.menu-toggle{display:block;margin-left:auto}.hero{padding:72px 0}.topic-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.card-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.feature-band .band-grid{gap:35px}.feature-band h2{font-size:36px}}
 @media(max-width:620px){.container{width:min(100% - 32px,1240px)}.header-row{min-height:70px}.brand{font-size:35px}.hero{padding:60px 0 70px}.hero h1{font-size:45px}.hero-lead{font-size:15px}.search-shell{display:flex;flex-wrap:wrap}.search-shell input{padding:14px 4px}.search-shell button{width:100%;padding:14px}.section{padding:51px 0}.section-head{display:block}.section-head .text-link{display:inline-block;margin-top:12px}.card-grid,.topic-grid,.feature-band .band-grid,.profile-grid,.footer-grid{grid-template-columns:1fr}.topic-grid{gap:10px}.topic-card{min-height:125px}.feature-band{padding:55px 0}.page-top{padding:38px 0}.content-area{padding:30px 0 60px}.toolbar{display:block}.toolbar input,.toolbar select{display:block;width:100%;margin-bottom:9px}.footer-bottom{display:block}.footer-bottom span{display:block;margin-bottom:10px}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;transition:none!important}}
+/* Native disclosure controls for municipality service areas */
+.municipality-topic{padding:0;overflow:hidden;scroll-margin-top:24px}
+.municipality-topic summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:22px 27px}
+.municipality-topic summary::-webkit-details-marker{display:none}
+.municipality-topic summary:focus-visible{outline:3px solid var(--blue);outline-offset:-4px}
+.municipality-topic summary:hover{background:#f9faff}
+.topic-heading{display:grid;gap:5px}
+.topic-heading strong{font:normal 27px/1.2 var(--display);color:var(--ink)}
+.topic-description{color:var(--muted);font-size:13px}
+.topic-toggle{flex:0 0 auto;font-size:24px;line-height:1;color:var(--blue)}
+.municipality-topic[open] .topic-toggle{transform:rotate(45deg)}
+.municipality-topic>.org-list{padding:0 24px 24px}
+.municipality-topic .org-result{min-height:72px}
+#borlange-results[hidden]{display:none}
+.chips button.chip{font-family:inherit;cursor:pointer}
+.chips button.chip:hover,.chips button.chip:focus-visible{background:#e0e7ff;border-color:#b8c9ff;color:var(--blue)}
+@media(max-width:620px){.municipality-topic summary{padding:18px}.municipality-topic>.org-list{padding:0 16px 18px}.topic-heading strong{font-size:23px}}
