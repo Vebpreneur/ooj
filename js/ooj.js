@@ -87,6 +87,7 @@ return shell(n[0],n[1],escape(label),'<div class="toolbar"><input id="dir-search
 function profile(id){
 const o=db.organizations.find(x=>String(x.id)===String(id));
 if(!o)return notFound();
+if(o.code==="2081"&&window.OOJ_BORLANGE_RENDER&&window.OOJ_BORLANGE)return window.OOJ_BORLANGE_RENDER.render(o,db,shell);
 const domain=o.url?new URL(o.url).hostname:null;
 const subject=o.type==="kommun"?"Kommuner":o.type==="region"?"Regioner":"Myndigheter",subjectLink=o.type==="kommun"?"kommuner":o.type==="region"?"regioner":"myndigheter";
 const searchURL=o.url?"https://www.google.com/search?q="+encodeURIComponent("site:"+domain+" "):null;
@@ -129,6 +130,7 @@ document.querySelectorAll("[data-nav]").forEach(a=>a.classList.toggle("active",a
 $("#home-search")?.addEventListener("submit",e=>{e.preventDefault();state.q=$("#home-q").value.trim();state.type="alla";state.page=1;location.hash="/sok"});
 const dir=$("#dir-search"),select=$("#dir-type"),county=$("#dir-county");
 if(dir){dir.value=state.q;select.value=route==="sok"?state.type:directoryType;renderResults();dir.addEventListener("input",()=>{state.q=dir.value;state.page=1;renderResults()});select.addEventListener("change",()=>{state.type=select.value;state.page=1;renderResults()});county.addEventListener("change",()=>{state.page=1;renderResults()})}
+if(route==="organisation"&&db.organizations.find(x=>String(x.id)===String(arg))?.code==="2081")window.OOJ_BORLANGE_RENDER?.wire();
 const mobile=$("#mobile-nav");if(mobile){mobile.hidden=true;$("#menu-toggle")?.setAttribute("aria-expanded","false")}
 window.scrollTo({top:0,behavior:"instant"});
 }
